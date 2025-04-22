@@ -40,68 +40,92 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.adifaisalr.myportfolio.ui.theme.MyPortfolioTheme
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 
 class MainActivity : ComponentActivity() {
+
+    @Serializable
+    object Profile
+
+    @Serializable
+    object FriendsList
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-            val scope = rememberCoroutineScope()
-            var text: String by remember { mutableStateOf("Hello World") }
+            val navController = rememberNavController()
 
-            MyPortfolioTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    ModalNavigationDrawer(
-                        drawerContent = {
-                            ModalDrawerSheet(modifier = Modifier.requiredWidth(250.dp)) {
-                                Text(text = "Drawer Title", modifier = Modifier.padding(16.dp))
-                                HorizontalDivider()
-                                NavigationDrawerItem(
-                                    label = { Text(text = "Education") },
-                                    selected = false,
-                                    onClick = {
-                                        scope.launch {
-                                            drawerState.close()
-                                            text = "Education"
-                                        }
-                                    })
-                                NavigationDrawerItem(
-                                    label = { Text(text = "Work Experience") },
-                                    selected = false,
-                                    onClick = {
-                                        scope.launch {
-                                            drawerState.close()
-                                            text = "Work Experience"
-                                        }
-                                    })
-                            }
-                        },
-                        drawerState = drawerState,
-                    ) {
-                        Scaffold(
-                            topBar = {
-                                TopAppBar(title = { Text(text = "My Portfolio") },
-                                    navigationIcon = {
-                                        IconButton(onClick = {
-                                            scope.launch {
-                                                if (drawerState.isClosed) {
-                                                    drawerState.open()
-                                                } else {
-                                                    drawerState.close()
-                                                }
-                                            }
-                                        }) {
-                                            Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu")
-                                        }
-                                    })
-                            }
-                        ) { innerPadding ->
-                            EducationScreen(Modifier.padding(innerPadding))
-                        }
+            NavHost(navController = navController, startDestination = Profile) {
+                composable<Profile> { HomeScreen(navController = navController) }
+                composable<FriendsList> { HomeScreen(navController = navController) }
+            }
+        }
+    }
+}
+
+@Composable
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+) {
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    var text: String by remember { mutableStateOf("Hello World") }
+    MyPortfolioTheme {
+        // A surface container using the 'background' color from the theme
+        Surface(modifier = Modifier.fillMaxSize()) {
+            ModalNavigationDrawer(
+                drawerContent = {
+                    ModalDrawerSheet(modifier = Modifier.requiredWidth(250.dp)) {
+                        Text(text = "Drawer Title", modifier = Modifier.padding(16.dp))
+                        HorizontalDivider()
+                        NavigationDrawerItem(
+                            label = { Text(text = "Education") },
+                            selected = false,
+                            onClick = {
+                                scope.launch {
+                                    drawerState.close()
+                                    text = "Education"
+                                }
+                            })
+                        NavigationDrawerItem(
+                            label = { Text(text = "Work Experience") },
+                            selected = false,
+                            onClick = {
+                                scope.launch {
+                                    drawerState.close()
+                                    text = "Work Experience"
+                                }
+                            })
                     }
+                },
+                drawerState = drawerState,
+            ) {
+                Scaffold(
+                    topBar = {
+                        TopAppBar(title = { Text(text = "My Portfolio") },
+                            navigationIcon = {
+                                IconButton(onClick = {
+                                    scope.launch {
+                                        if (drawerState.isClosed) {
+                                            drawerState.open()
+                                        } else {
+                                            drawerState.close()
+                                        }
+                                    }
+                                }) {
+                                    Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu")
+                                }
+                            })
+                    }
+                ) { innerPadding ->
+                    EducationScreen(modifier = Modifier.padding(innerPadding), navController = navController)
                 }
             }
         }
@@ -109,7 +133,11 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun EducationScreen(modifier: Modifier = Modifier, viewModel: EducationViewModel = viewModel()) {
+fun EducationScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    viewModel: EducationViewModel = viewModel()
+) {
     val uiState by viewModel.uiState.collectAsState()
 
     Box(modifier) {
@@ -134,7 +162,7 @@ fun EducationScreen(modifier: Modifier = Modifier, viewModel: EducationViewModel
                     Button(onClick = {
                         viewModel.updateState(
                             EducationViewModel.UiState(
-                                educationList = listOf("University","High School"),
+                                educationList = listOf("University", "High School"),
                                 isError = false,
                                 isLoading = false
                             )
@@ -146,8 +174,8 @@ fun EducationScreen(modifier: Modifier = Modifier, viewModel: EducationViewModel
             }
 
             else -> {
-                LazyColumn{
-                    items(uiState.educationList){
+                LazyColumn {
+                    items(uiState.educationList) {
                         Text(
                             text = it,
                             modifier = Modifier.padding(10.dp)
