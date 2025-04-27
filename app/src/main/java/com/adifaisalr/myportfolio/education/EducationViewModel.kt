@@ -1,4 +1,4 @@
-package com.adifaisalr.myportfolio
+package com.adifaisalr.myportfolio.education
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
