@@ -1,6 +1,7 @@
 package com.adifaisalr.myportfolio.education
 
 import androidx.lifecycle.ViewModel
+import com.adifaisalr.myportfolio.Education
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -14,7 +15,7 @@ class EducationViewModel : ViewModel() {
     }
 
     data class UiState(
-        var educationList: List<String> = listOf(),
+        var educationList: List<Education> = listOf(),
         var isError: Boolean = false,
         var isLoading: Boolean = false,
     )
